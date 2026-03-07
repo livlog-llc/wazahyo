@@ -18,7 +18,7 @@
 - コード長: **固定長5文字**
 - 使用文字: **ひらがな + 漢字**
 
-### 2.1 ひらがな（43文字）
+### 2.1 ひらがな（44文字）
 
 ```text
 あいうえお
@@ -46,7 +46,7 @@
 - 折句と相性が悪い
 - 入力ミスを防ぐ
 
-### 2.2 漢字（45文字）
+### 2.2 漢字（44文字）
 
 俳句文化と親和性の高い、季節・自然・地形を表す漢字を採用します。
 
@@ -59,13 +59,13 @@
 岸 浜 浦
 森 林 野 原 丘
 里 村 町 都
-花 草 木 竹 石 岩
+花 草 木 竹 石
 ```
 
 ### 2.3 総文字数
 
 ```text
-43 + 45 = 88
+44 + 44 = 88
 ```
 
 ---
@@ -177,10 +177,11 @@
 
 - 基数: `[8,8,10,10,4,4,4,4,4,4]`
 
-```python
-detail = 0
-for value, base in zip(values, bases):
-    detail = detail * base + value
+```java
+int detail = 0;
+for (int i = 0; i < BASES.length; i++) {
+    detail = detail * BASES[i] + values[i];
+}
 ```
 
 - 結果: `detail = 0〜26,214,399`
@@ -189,8 +190,8 @@ for value, base in zip(values, bases):
 
 1次メッシュ区分を加算します。
 
-```python
-n = detail * 200 + mesh1_group
+```java
+long n = (long) detail * 200 + mesh1Group;
 ```
 
 - `mesh1_group = 0〜199`
@@ -211,16 +212,16 @@ n = detail * 200 + mesh1_group
 
 1次メッシュ区分を取得します。
 
-```python
-mesh1_group = n % 200
+```java
+int mesh1Group = (int) (n % 200);
 ```
 
 ### ステップ3
 
 詳細位置番号を取得します。
 
-```python
-detail = n // 200
+```java
+int detail = (int) (n / 200);
 ```
 
 ### ステップ4
@@ -229,55 +230,68 @@ detail = n // 200
 
 ---
 
-## 11. Python参考実装
+## 11. Java参考実装
 
 ### 11.1 文字セット
 
-```python
-HIRAGANA = "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわ"
-KANJI = "春夏秋冬月雪風雨霧霞星空陽朝夕夜山川海島岬峰谷沢滝湖沼岸浜浦森林野原丘里村町都花草木竹石岩"
-CHARS = HIRAGANA + KANJI
-BASE = len(CHARS)
+```java
+private static final String HIRAGANA =
+    "あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわ";
+private static final String KANJI =
+    "春夏秋冬月雪風雨霧霞星空陽朝夕夜山川海島岬峰谷沢滝湖沼岸浜浦森林野原丘里村町都花草木竹石";
+private static final String CHARS = HIRAGANA + KANJI;
+private static final int BASE = CHARS.length(); // 88
 ```
 
 ### 11.2 Base88変換
 
-```python
-def to_base88(n, length=5):
-    s = []
-    for _ in range(length):
-        s.append(CHARS[n % BASE])
-        n //= BASE
-    return ''.join(reversed(s))
+```java
+static String toBase88(long n, int length) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < length; i++) {
+        int idx = (int) (n % BASE);
+        sb.append(CHARS.charAt(idx));
+        n /= BASE;
+    }
+    return sb.reverse().toString();
+}
 
-def from_base88(code):
-    n = 0
-    for c in code:
-        n = n * BASE + CHARS.index(c)
-    return n
+static long fromBase88(String code) {
+    long n = 0;
+    for (int i = 0; i < code.length(); i++) {
+        int idx = CHARS.indexOf(code.charAt(i));
+        if (idx < 0) throw new IllegalArgumentException("invalid char: " + code.charAt(i));
+        n = n * BASE + idx;
+    }
+    return n;
+}
 ```
 
 ### 11.3 詳細メッシュ番号化
 
-```python
-BASES = [8,8,10,10,4,4,4,4,4,4]
+```java
+private static final int[] BASES = {8, 8, 10, 10, 4, 4, 4, 4, 4, 4};
 
-def encode_detail(parts):
-    n = 0
-    for v, b in zip(parts, BASES):
-        n = n * b + v
-    return n
+static int encodeDetail(int[] parts) {
+    int n = 0;
+    for (int i = 0; i < BASES.length; i++) {
+        n = n * BASES[i] + parts[i];
+    }
+    return n;
+}
 ```
 
 ### 11.4 復号
 
-```python
-def decode_detail(n):
-    values = []
-    for b in reversed(BASES):
-        values.append(n % b)
-        n //= b
-    return list(reversed(values))
+```java
+static int[] decodeDetail(int n) {
+    int[] values = new int[BASES.length];
+    for (int i = BASES.length - 1; i >= 0; i--) {
+        values[i] = n % BASES[i];
+        n /= BASES[i];
+    }
+    return values;
+}
 ```
 
 ---
