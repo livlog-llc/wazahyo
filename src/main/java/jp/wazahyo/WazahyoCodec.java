@@ -36,6 +36,8 @@ public final class WazahyoCodec {
     public static final int BASE = CHARS.length();
     /** 固定コード長（5文字）。 */
     public static final int CODE_LENGTH = 5;
+    /** 9次メッシュコードの桁数。 */
+    public static final int MESH9_CODE_LENGTH = 14;
 
     /** 1次メッシュ区分の総数。 */
     public static final int MESH1_GROUP_COUNT = 200;
@@ -268,6 +270,197 @@ public final class WazahyoCodec {
         int[] parts = decodeDetail(detail);
 
         return new Decoded(code, n, mesh1Group, detail, parts);
+    }
+
+    /**
+     * 緯度経度から9次メッシュを算出し、そのまま5文字コードへ変換します。
+     *
+     * @param latitude 緯度（度）
+     * @param longitude 経度（度）
+     * @return 5文字コード
+     */
+    public static String encodeFromLatLon(double latitude, double longitude) {
+        Mesh9 mesh9 = latLonToMesh9(latitude, longitude);
+        return encodeByMesh1Code(mesh9.mesh1Code(), mesh9.parts());
+    }
+
+    /**
+     * 緯度経度から9次メッシュコード（14桁）を算出します。
+     *
+     * @param latitude 緯度（度）
+     * @param longitude 経度（度）
+     * @return 9次メッシュコード（14桁）
+     */
+    public static String latLonToMeshCode(double latitude, double longitude) {
+        return latLonToMesh9(latitude, longitude).meshCode();
+    }
+
+    /**
+     * 9次メッシュコード（14桁）を5文字コードへ変換します。
+     *
+     * @param meshCode 9次メッシュコード（14桁）
+     * @return 5文字コード
+     */
+    public static String encodeFromMeshCode(String meshCode) {
+        Mesh9 parsed = parseMesh9Code(meshCode);
+        return encodeByMesh1Code(parsed.mesh1Code(), parsed.parts());
+    }
+
+    /**
+     * 5文字コードから9次メッシュコード（14桁）へ変換します。
+     *
+     * @param code 5文字コード
+     * @return 9次メッシュコード（14桁）
+     */
+    public static String decodeToMeshCode(String code) {
+        Decoded decoded = decode(code);
+        int mesh1Code = decodedMesh1CodeOrMinusOne(decoded);
+        if (mesh1Code < 0) {
+            throw new IllegalArgumentException("decoded mesh1Group is outside supported mesh1 list: " + decoded.mesh1Group());
+        }
+        return buildMesh9Code(mesh1Code, decoded.parts());
+    }
+
+    /**
+     * 5文字コードを復号し、9次メッシュ中心の緯度経度を返します。
+     *
+     * @param code 5文字コード
+     * @return 緯度経度
+     */
+    public static LatLon decodeToLatLon(String code) {
+        return meshCodeToLatLon(decodeToMeshCode(code));
+    }
+
+    /**
+     * 9次メッシュコード（14桁）の中心緯度経度を返します。
+     *
+     * @param meshCode 9次メッシュコード（14桁）
+     * @return 緯度経度
+     */
+    public static LatLon meshCodeToLatLon(String meshCode) {
+        Mesh9 parsed = parseMesh9Code(meshCode);
+
+        int mesh1Code = parsed.mesh1Code();
+        int p0 = mesh1Code / 100;
+        int p1 = mesh1Code % 100;
+        int[] parts = parsed.parts();
+
+        double lat = p0 / 1.5;
+        double lon = 100.0 + p1;
+
+        lat += parts[0] * (5.0 / 60.0);
+        lon += parts[1] * (7.5 / 60.0);
+        lat += parts[2] * (30.0 / 3600.0);
+        lon += parts[3] * (45.0 / 3600.0);
+
+        double latCell = 30.0 / 3600.0;
+        double lonCell = 45.0 / 3600.0;
+        for (int i = 4; i < BASES.length; i++) {
+            latCell /= 2.0;
+            lonCell /= 2.0;
+            int d = parts[i];
+            lat += (d / 2) * latCell;
+            lon += (d % 2) * lonCell;
+        }
+
+        return new LatLon(lat + latCell / 2.0, lon + lonCell / 2.0);
+    }
+
+    private static Mesh9 latLonToMesh9(double latitude, double longitude) {
+        if (!Double.isFinite(latitude) || !Double.isFinite(longitude)) {
+            throw new IllegalArgumentException("latitude/longitude must be finite");
+        }
+
+        double lat15 = latitude * 1.5;
+        int p = (int) Math.floor(lat15);
+
+        double lonShift = longitude - 100.0;
+        int q = (int) Math.floor(lonShift);
+
+        if (p < 0 || p > 99 || q < 0 || q > 99) {
+            throw new IllegalArgumentException("latitude/longitude is outside 1st mesh addressable range");
+        }
+
+        int mesh1Code = p * 100 + q;
+        if (!isSupportedMesh1Code(mesh1Code)) {
+            throw new IllegalArgumentException("mesh1Code is outside supported Japan land meshes: " + mesh1Code);
+        }
+
+        int[] parts = new int[BASES.length];
+        double remLat = lat15 - p;
+        double remLon = lonShift - q;
+
+        remLat *= 8.0;
+        remLon *= 8.0;
+        parts[0] = (int) Math.floor(remLat);
+        parts[1] = (int) Math.floor(remLon);
+        remLat -= parts[0];
+        remLon -= parts[1];
+
+        remLat *= 10.0;
+        remLon *= 10.0;
+        parts[2] = (int) Math.floor(remLat);
+        parts[3] = (int) Math.floor(remLon);
+        remLat -= parts[2];
+        remLon -= parts[3];
+
+        for (int i = 4; i < BASES.length; i++) {
+            remLat *= 2.0;
+            remLon *= 2.0;
+            int latBit = (int) Math.floor(remLat);
+            int lonBit = (int) Math.floor(remLon);
+            parts[i] = latBit * 2 + lonBit;
+            remLat -= latBit;
+            remLon -= lonBit;
+        }
+
+        return new Mesh9(mesh1Code, parts, buildMesh9Code(mesh1Code, parts));
+    }
+
+    private static Mesh9 parseMesh9Code(String meshCode) {
+        if (meshCode == null || meshCode.length() != MESH9_CODE_LENGTH || !meshCode.chars().allMatch(Character::isDigit)) {
+            throw new IllegalArgumentException("meshCode must be 14-digit 9th mesh code");
+        }
+
+        int mesh1Code = Integer.parseInt(meshCode.substring(0, 4));
+        if (!isSupportedMesh1Code(mesh1Code)) {
+            throw new IllegalArgumentException("unsupported mesh1Code: " + mesh1Code);
+        }
+
+        int[] parts = new int[BASES.length];
+        parts[0] = Character.digit(meshCode.charAt(4), 10);
+        parts[1] = Character.digit(meshCode.charAt(5), 10);
+        parts[2] = Character.digit(meshCode.charAt(6), 10);
+        parts[3] = Character.digit(meshCode.charAt(7), 10);
+        for (int i = 4; i < BASES.length; i++) {
+            int d = Character.digit(meshCode.charAt(i + 4), 10);
+            if (d < 1 || d > 4) {
+                throw new IllegalArgumentException("meshCode 4th-9th mesh digits must be in [1,4]");
+            }
+            parts[i] = d - 1;
+        }
+        encodeDetail(parts);
+        return new Mesh9(mesh1Code, parts, meshCode);
+    }
+
+    private static String buildMesh9Code(int mesh1Code, int[] parts) {
+        encodeDetail(parts);
+        StringBuilder sb = new StringBuilder(MESH9_CODE_LENGTH);
+        sb.append(String.format("%04d", mesh1Code));
+        sb.append(parts[0]).append(parts[1]).append(parts[2]).append(parts[3]);
+        for (int i = 4; i < parts.length; i++) {
+            sb.append(parts[i] + 1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 緯度経度値。
+     */
+    public record LatLon(double latitude, double longitude) {
+    }
+
+    private record Mesh9(int mesh1Code, int[] parts, String meshCode) {
     }
 
     /**

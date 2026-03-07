@@ -407,6 +407,26 @@ java -jar target/wazahyo-1.0.0.jar decode <5-char-code>
 java -jar target/wazahyo-1.0.0.jar decode せ春里か湖
 ```
 
+#### 緯度経度から5文字コード（正規ルート）
+
+```bash
+java -jar target/wazahyo-1.0.0.jar encode-latlon <latitude> <longitude>
+```
+
+例:
+
+```bash
+java -jar target/wazahyo-1.0.0.jar encode-latlon 35.681236 139.767125
+```
+
+#### 14桁メッシュコードとの相互変換
+
+```bash
+java -jar target/wazahyo-1.0.0.jar encode-meshcode <14-digit-mesh9>
+java -jar target/wazahyo-1.0.0.jar decode-meshcode <5-char-code>
+java -jar target/wazahyo-1.0.0.jar decode-latlon <5-char-code>
+```
+
 #### ヘルプ表示
 
 ```bash
@@ -421,3 +441,5 @@ java -jar target/wazahyo-1.0.0.jar help
   - `p2,p3`: `0〜9`
   - `p4..p9`: `0〜3`
 - `5-char-code`: ひらがな+漢字の5文字コード
+- `latitude`,`longitude`: 緯度経度（度）
+- `14-digit-mesh9`: 標準地域メッシュの9次コード（14桁）
