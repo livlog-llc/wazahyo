@@ -16,8 +16,8 @@ public final class IdeRunSample {
      */
     public static void main(String[] args) {
         // 東京駅付近（サンプル）
-        double latitude = 35.681236;
-        double longitude = 139.767125;
+        double latitude = 35.3606255;
+        double longitude = 138.7273634;
 
         // 1) 緯度経度 -> meshCode
         String meshCodeFromLatLon = WazahyoCodec.latLonToMeshCode(latitude, longitude);
