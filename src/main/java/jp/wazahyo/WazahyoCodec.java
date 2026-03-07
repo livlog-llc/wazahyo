@@ -1,6 +1,15 @@
 package jp.wazahyo;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 日本位置コード（和座標）仕様に基づくエンコード/デコードを提供するユーティリティクラスです。
@@ -34,6 +43,13 @@ public final class WazahyoCodec {
     public static final int DETAIL_MAX_EXCLUSIVE = 26_214_400;
     /** 仕様上で利用する全コード空間（排他的上限）。 */
     public static final long CAPACITY = 5_242_880_000L;
+
+    /** 1次メッシュ番号一覧(JSON)のリソースパス。 */
+    private static final String MESH1_CODES_RESOURCE = "/mesh1_groups.json";
+    /** サポート対象の1次メッシュ番号（全175件）。 */
+    public static final List<Integer> SUPPORTED_MESH1_CODES = loadSupportedMesh1Codes();
+    /** 1次メッシュ番号から内部区分への逆引きマップ。 */
+    private static final Map<Integer, Integer> MESH1_TO_GROUP = buildMesh1ToGroup();
 
     /**
      * インスタンス化を禁止するためのprivateコンストラクタです。
@@ -130,6 +146,72 @@ public final class WazahyoCodec {
         return values;
     }
 
+
+    /**
+     * 1次メッシュ番号がサポート対象かを判定します。
+     *
+     * @param mesh1Code 1次メッシュ番号（例: 5339）
+     * @return サポート対象なら {@code true}
+     */
+    public static boolean isSupportedMesh1Code(int mesh1Code) {
+        return MESH1_TO_GROUP.containsKey(mesh1Code);
+    }
+
+    /**
+     * 1次メッシュ番号を内部の1次メッシュ区分へ変換します。
+     *
+     * @param mesh1Code 1次メッシュ番号（例: 5339）
+     * @return 対応する区分インデックス（0始まり）
+     * @throws IllegalArgumentException サポート対象外の場合
+     */
+    public static int mesh1CodeToGroup(int mesh1Code) {
+        Integer group = MESH1_TO_GROUP.get(mesh1Code);
+        if (group == null) {
+            throw new IllegalArgumentException("unsupported mesh1Code: " + mesh1Code);
+        }
+        return group;
+    }
+
+    /**
+     * 1次メッシュ区分を元の1次メッシュ番号へ逆変換します。
+     *
+     * @param mesh1Group 区分インデックス（0始まり）
+     * @return 1次メッシュ番号
+     * @throws IllegalArgumentException 区分が範囲外の場合
+     */
+    public static int groupToMesh1Code(int mesh1Group) {
+        if (mesh1Group < 0 || mesh1Group >= SUPPORTED_MESH1_CODES.size()) {
+            throw new IllegalArgumentException("mesh1Group must be in [0," + (SUPPORTED_MESH1_CODES.size() - 1) + "] for supported list");
+        }
+        return SUPPORTED_MESH1_CODES.get(mesh1Group);
+    }
+
+    /**
+     * 1次メッシュ番号と詳細メッシュ配列から5文字コードを生成します。
+     *
+     * @param mesh1Code 1次メッシュ番号（JSON定義の175件のみ）
+     * @param parts 詳細メッシュの各桁（長さ10）
+     * @return 5文字コード
+     */
+    public static String encodeByMesh1Code(int mesh1Code, int[] parts) {
+        int mesh1Group = mesh1CodeToGroup(mesh1Code);
+        return encode(mesh1Group, parts);
+    }
+
+    /**
+     * 復号結果の1次メッシュ区分を1次メッシュ番号へ変換します。
+     *
+     * @param decoded 復号結果
+     * @return 1次メッシュ番号（サポート外区分の場合は {@code -1}）
+     */
+    public static int decodedMesh1CodeOrMinusOne(Decoded decoded) {
+        int group = decoded.mesh1Group();
+        if (group < 0 || group >= SUPPORTED_MESH1_CODES.size()) {
+            return -1;
+        }
+        return SUPPORTED_MESH1_CODES.get(group);
+    }
+
     /**
      * 1次メッシュ区分と詳細メッシュ配列から5文字コードを生成します。
      *
@@ -214,4 +296,48 @@ public final class WazahyoCodec {
                     '}';
         }
     }
+    /**
+     * JSONリソースからサポート対象の1次メッシュ番号一覧を読み込みます。
+     */
+    private static List<Integer> loadSupportedMesh1Codes() {
+        try (InputStream in = WazahyoCodec.class.getResourceAsStream(MESH1_CODES_RESOURCE)) {
+            if (in == null) {
+                throw new IllegalStateException("Resource not found: " + MESH1_CODES_RESOURCE);
+            }
+            String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+            int arrayStart = json.indexOf('[');
+            int arrayEnd = json.lastIndexOf(']');
+            if (arrayStart < 0 || arrayEnd <= arrayStart) {
+                throw new IllegalStateException("mesh1_groups.json does not contain a valid array");
+            }
+            String arrayBody = json.substring(arrayStart + 1, arrayEnd);
+            Matcher matcher = Pattern.compile("\\d+").matcher(arrayBody);
+            java.util.ArrayList<Integer> values = new java.util.ArrayList<>();
+            while (matcher.find()) {
+                values.add(Integer.parseInt(matcher.group()));
+            }
+            if (values.size() != 175) {
+                throw new IllegalStateException("mesh1 code count must be 175, but was " + values.size());
+            }
+            return Collections.unmodifiableList(values);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load " + MESH1_CODES_RESOURCE, e);
+        }
+    }
+
+    /**
+     * 1次メッシュ番号から区分への逆引きマップを構築します。
+     */
+    private static Map<Integer, Integer> buildMesh1ToGroup() {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < SUPPORTED_MESH1_CODES.size(); i++) {
+            int code = SUPPORTED_MESH1_CODES.get(i);
+            Integer old = map.put(code, i);
+            if (old != null) {
+                throw new IllegalStateException("Duplicate mesh1 code in list: " + code);
+            }
+        }
+        return Collections.unmodifiableMap(map);
+    }
+
 }
