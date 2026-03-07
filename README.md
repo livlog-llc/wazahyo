@@ -355,3 +355,66 @@ def decode_detail(n):
 6642 6643 6644 6645 6646 6647 6741 6742 6747 6748
 6840 6841 6842 6847 6848
 ```
+
+---
+
+## 17. Java版ライブラリの使い方
+
+このリポジトリには、README仕様を実装したJavaライブラリ（CLI付き）が含まれています。
+
+### 17.1 ビルド
+
+```bash
+mvn -DskipTests package
+```
+
+生成物:
+
+- `target/wazahyo-1.0.0.jar`
+
+### 17.2 実行方法
+
+#### デモ実行（引数なし）
+
+```bash
+java -jar target/wazahyo-1.0.0.jar
+```
+
+#### エンコード
+
+```bash
+java -jar target/wazahyo-1.0.0.jar encode <mesh1Group> <p0,p1,p2,p3,p4,p5,p6,p7,p8,p9>
+```
+
+例:
+
+```bash
+java -jar target/wazahyo-1.0.0.jar encode 42 1,2,3,4,1,0,2,3,1,2
+```
+
+#### デコード
+
+```bash
+java -jar target/wazahyo-1.0.0.jar decode <5-char-code>
+```
+
+例:
+
+```bash
+java -jar target/wazahyo-1.0.0.jar decode せ春里か湖
+```
+
+#### ヘルプ表示
+
+```bash
+java -jar target/wazahyo-1.0.0.jar help
+```
+
+### 17.3 引数の意味
+
+- `mesh1Group`: `0〜199`
+- `p0..p9`: 詳細メッシュ配列（混合基数）
+  - `p0,p1`: `0〜7`
+  - `p2,p3`: `0〜9`
+  - `p4..p9`: `0〜3`
+- `5-char-code`: ひらがな+漢字の5文字コード
