@@ -1,4 +1,4 @@
-package jp.wazahyo;
+package llc.livlog.wazahyo;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>jp.wazahyo</groupId>
+    <groupId>llc.livlog.wazahyo</groupId>
     <artifactId>wazahyo</artifactId>
     <version>1.0.0</version>
     <name>wazahyo</name>
@@ -24,7 +24,7 @@
                 <configuration>
                     <archive>
                         <manifest>
-                            <mainClass>jp.wazahyo.App</mainClass>
+                            <mainClass>llc.livlog.wazahyo.App</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
