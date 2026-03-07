@@ -1,4 +1,4 @@
-package jp.wazahyo;
+package llc.livlog.wazahyo;
 
 import java.util.Arrays;
 
