@@ -386,7 +386,8 @@ java -jar target/wazahyo-1.0.0.jar
 #### IDEからソース実行
 
 `jp.wazahyo.IdeRunSample` をIDEでそのまま実行すると、
-緯度経度→和座標コード→9次メッシュコード→復号中心点まで一通り確認できます。
+緯度経度→9次メッシュコード→和座標コードへの変換と、
+和座標コード/9次メッシュコードからのデコード結果（中心座標）を一通り確認できます。
 
 （IntelliJ IDEA / Eclipse などで `IdeRunSample#main` をRun）
 
