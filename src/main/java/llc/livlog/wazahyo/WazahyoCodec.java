@@ -345,14 +345,18 @@ public final class WazahyoCodec {
         int p1 = mesh1Code % 100;
         int[] parts = parsed.parts();
 
+        // 1次メッシュ左下（南西）基準点を復元。
         double lat = p0 / 1.5;
         double lon = 100.0 + p1;
 
+        // 2次・3次メッシュ分のオフセットを加算。
         lat += parts[0] * (5.0 / 60.0);
         lon += parts[1] * (7.5 / 60.0);
         lat += parts[2] * (30.0 / 3600.0);
         lon += parts[3] * (45.0 / 3600.0);
 
+        // 4〜9次は各段でセルサイズを1/2し、
+        // d(0〜3)を(緯度ビット, 経度ビット)=(d/2, d%2)として適用。
         double latCell = 30.0 / 3600.0;
         double lonCell = 45.0 / 3600.0;
         for (int i = 4; i < BASES.length; i++) {
@@ -363,17 +367,31 @@ public final class WazahyoCodec {
             lon += (d % 2) * lonCell;
         }
 
+        // 左下ではなく、最終9次メッシュの中心座標を返す。
         return new LatLon(lat + latCell / 2.0, lon + lonCell / 2.0);
     }
 
+    /**
+     * 緯度経度を標準地域メッシュ（9次）表現へ変換します。
+     * <p>
+     * 処理の要点は次の通りです。
+     * </p>
+     * <ol>
+     *   <li>緯度/経度から1次メッシュ番号（{@code mesh1Code}）を算出する</li>
+     *   <li>1次メッシュ内部の小数残差を使って2次〜9次の10桁（{@code parts}）を決める</li>
+     *   <li>最終的に14桁の9次メッシュコードを組み立てる</li>
+     * </ol>
+     */
     private static Mesh9 latLonToMesh9(double latitude, double longitude) {
         if (!Double.isFinite(latitude) || !Double.isFinite(longitude)) {
             throw new IllegalArgumentException("latitude/longitude must be finite");
         }
 
+        // 1次メッシュの緯度側は「緯度×1.5」の整数部（40分単位）で求まる。
         double lat15 = latitude * 1.5;
         int p = (int) Math.floor(lat15);
 
+        // 経度側は「経度-100」の整数部（1度単位）で求まる。
         double lonShift = longitude - 100.0;
         int q = (int) Math.floor(lonShift);
 
@@ -387,9 +405,11 @@ public final class WazahyoCodec {
         }
 
         int[] parts = new int[BASES.length];
+        // 1次メッシュ内部の残差（0以上1未満）を段階的に拡大して各メッシュ桁を取り出す。
         double remLat = lat15 - p;
         double remLon = lonShift - q;
 
+        // 2次メッシュ: 8×8 分割。整数部が2次メッシュ位置。
         remLat *= 8.0;
         remLon *= 8.0;
         parts[0] = (int) Math.floor(remLat);
@@ -397,6 +417,7 @@ public final class WazahyoCodec {
         remLat -= parts[0];
         remLon -= parts[1];
 
+        // 3次メッシュ: 10×10 分割。整数部が3次メッシュ位置。
         remLat *= 10.0;
         remLon *= 10.0;
         parts[2] = (int) Math.floor(remLat);
@@ -404,6 +425,9 @@ public final class WazahyoCodec {
         remLat -= parts[2];
         remLon -= parts[3];
 
+        // 4〜9次メッシュ: 各段2×2分割。
+        // remを2倍して得た整数部を緯度/経度ビットとして取り出し、
+        // 1桁(0〜3)へ「latBit*2 + lonBit」で合成する。
         for (int i = 4; i < BASES.length; i++) {
             remLat *= 2.0;
             remLon *= 2.0;
