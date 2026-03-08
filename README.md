@@ -50,6 +50,38 @@ java -jar target/wazahyo-1.0.0-SNAPSHOT.jar decode-latlon せ春里か湖
 - 設計書: [`docs/design.md`](docs/design.md)
 - JitPack公開ガイド: [`docs/jitpack-publish-guide.md`](docs/jitpack-publish-guide.md)
 
+## JitPackでの利用方法
+
+[![](https://jitpack.io/v/livlog-llc/wazahyo.svg)](https://jitpack.io/#livlog-llc/wazahyo)
+
+Gitプロジェクトとして公開している `livlog-llc/wazahyo` は、JitPack経由で依存関係として利用できます。
+
+### Step 1. リポジトリを追加（Maven）
+
+`pom.xml` に JitPack リポジトリを追加します。
+
+```xml
+<repositories>
+    <repository>
+        <id>jitpack.io</id>
+        <url>https://jitpack.io</url>
+    </repository>
+</repositories>
+```
+
+### Step 2. 依存関係を追加
+
+```xml
+<dependency>
+    <groupId>com.github.livlog-llc</groupId>
+    <artifactId>wazahyo</artifactId>
+    <version>v1.0.0</version>
+</dependency>
+```
+
+初回リクエスト時にJitPackがコードをチェックアウトしてビルドし、生成物（jar / aar）を配信します。
+GitHub Releases がない場合は、短いコミットハッシュや `master-SNAPSHOT` をバージョンとして指定できます。
+
 ## コントリビュート
 
 和座標を広く使えるOSSに育てるため、Issue・Pull Requestを歓迎します。
