@@ -10,8 +10,8 @@
     <description>Japanese 5-character location code library based on README spec</description>
 
     <scm>
-        <url>https://github.com/blue-islands/wazahyo</url>
-        <connection>scm:git:git@github.com:blue-islands/wazahyo.git</connection>
+        <url>https://github.com/livlog-llc/wazahyo</url>
+        <connection>scm:git:git@github.com:livlog-llc/wazahyo.git</connection>
         <tag>HEAD</tag>
     </scm>
 
