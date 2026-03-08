@@ -48,6 +48,7 @@ java -jar target/wazahyo-1.0.0.jar decode-latlon せ春里か湖
 ## ドキュメント
 
 - 設計書: [`docs/design.md`](docs/design.md)
+- JitPack公開ガイド: [`docs/jitpack-publish-guide.md`](docs/jitpack-publish-guide.md)
 
 ## コントリビュート
 
