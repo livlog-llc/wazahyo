@@ -11,7 +11,7 @@
 
     <scm>
         <url>https://github.com/livlog-llc/wazahyo</url>
-        <connection>scm:git:git@github.com:livlog-llc/wazahyo.git</connection>
+        <connection>scm:git:https://github.com/livlog-llc/wazahyo.git</connection>
         <tag>HEAD</tag>
     </scm>
 
