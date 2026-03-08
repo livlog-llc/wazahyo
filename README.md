@@ -29,20 +29,20 @@ mvn clean package
 生成されたJARでCLIを実行できます。
 
 ```bash
-java -jar target/wazahyo-1.0.0.jar help
+java -jar target/wazahyo-1.0.0-SNAPSHOT.jar help
 ```
 
 ## 使い方（CLI）
 
 ```bash
 # 緯度経度 -> 和座標コード
-java -jar target/wazahyo-1.0.0.jar encode-latlon 35.681236 139.767125
+java -jar target/wazahyo-1.0.0-SNAPSHOT.jar encode-latlon 35.681236 139.767125
 
 # 和座標コード -> 9次メッシュコード
-java -jar target/wazahyo-1.0.0.jar decode-meshcode せ春里か湖
+java -jar target/wazahyo-1.0.0-SNAPSHOT.jar decode-meshcode せ春里か湖
 
 # 和座標コード -> 緯度経度（9次メッシュ中心）
-java -jar target/wazahyo-1.0.0.jar decode-latlon せ春里か湖
+java -jar target/wazahyo-1.0.0-SNAPSHOT.jar decode-latlon せ春里か湖
 ```
 
 ## ドキュメント
