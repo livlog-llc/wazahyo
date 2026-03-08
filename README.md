@@ -62,4 +62,4 @@ java -jar target/wazahyo-1.0.0.jar decode-latlon せ春里か湖
 
 ## ライセンス
 
-ライセンスはリポジトリの方針に従います（必要に応じて追記予定）。
+本プロジェクトは [MIT License](LICENSE) のもとで公開しています。
