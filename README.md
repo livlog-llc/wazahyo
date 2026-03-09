@@ -79,6 +79,36 @@ Gitプロジェクトとして公開している `livlog-llc/wazahyo` は、JitP
 </dependency>
 ```
 
+### Step 3. ソースコードから呼び出す
+
+`WazahyoCodec` はすべて `static` メソッドなので、そのまま呼び出して利用できます。
+
+```java
+import llc.livlog.wazahyo.WazahyoCodec;
+
+public class WazahyoExample {
+    public static void main(String[] args) {
+        double latitude = 35.681236;
+        double longitude = 139.767125;
+
+        // 緯度経度 -> 和座標コード
+        String code = WazahyoCodec.encodeFromLatLon(latitude, longitude);
+
+        // 和座標コード -> 9次メッシュコード
+        String meshCode = WazahyoCodec.decodeToMeshCode(code);
+
+        // 和座標コード -> 緯度経度（9次メッシュ中心）
+        WazahyoCodec.LatLon center = WazahyoCodec.decodeToLatLon(code);
+
+        System.out.println("wazahyo code: " + code);
+        System.out.println("mesh code   : " + meshCode);
+        System.out.printf("center lat/lon: %.8f, %.8f%n", center.latitude(), center.longitude());
+    }
+}
+```
+
+APIの詳しい変換フロー例は `src/main/java/llc/livlog/wazahyo/IdeRunSample.java` も参照してください。
+
 初回リクエスト時にJitPackがコードをチェックアウトしてビルドし、生成物（jar / aar）を配信します。
 GitHub Releases がない場合は、短いコミットハッシュや `master-SNAPSHOT` をバージョンとして指定できます。
 
