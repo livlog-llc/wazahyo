@@ -3,14 +3,14 @@
 
     <groupId>llc.livlog.wazahyo</groupId>
     <artifactId>wazahyo</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2-SNAPSHOT</version>
     <name>wazahyo</name>
     <description>Japanese 5-character location code library based on README spec</description>
 
     <scm>
         <url>https://github.com/livlog-llc/wazahyo</url>
         <connection>scm:git:https://github.com/livlog-llc/wazahyo.git</connection>
-        <tag>v1.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <properties>
