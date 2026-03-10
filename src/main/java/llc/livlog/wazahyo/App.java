@@ -231,26 +231,26 @@ public final class App {
      */
     private static void usage() {
         System.out.println("Usage:");
-        System.out.println("  java -jar wazahyo-1.0.0.jar encode <mesh1Group> <p0,p1,p2,p3,p4,p5,p6,p7,p8,p9>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar encode-mesh1 <mesh1Code> <p0,p1,p2,p3,p4,p5,p6,p7,p8,p9>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar encode-latlon <latitude> <longitude>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar encode-meshcode <14-digit-mesh9>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar decode <5-char-code>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar decode-meshcode <5-char-code>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar decode-latlon <5-char-code>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar mesh1-to-group <mesh1Code>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar group-to-mesh1 <mesh1Group>");
-        System.out.println("  java -jar wazahyo-1.0.0.jar help");
-        System.out.println("  java -jar wazahyo-1.0.0.jar   # demo");
+        System.out.println("  java -jar target/wazahyo-<version>.jar encode <mesh1Group> <p0,p1,p2,p3,p4,p5,p6,p7,p8,p9>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar encode-mesh1 <mesh1Code> <p0,p1,p2,p3,p4,p5,p6,p7,p8,p9>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar encode-latlon <latitude> <longitude>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar encode-meshcode <14-digit-mesh9>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar decode <5-char-code>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar decode-meshcode <5-char-code>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar decode-latlon <5-char-code>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar mesh1-to-group <mesh1Code>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar group-to-mesh1 <mesh1Group>");
+        System.out.println("  java -jar target/wazahyo-<version>.jar help");
+        System.out.println("  java -jar target/wazahyo-<version>.jar   # demo");
         System.out.println();
         System.out.println("Example:");
-        System.out.println("  java -jar wazahyo-1.0.0.jar encode 42 1,2,3,4,1,0,2,3,1,2");
-        System.out.println("  java -jar wazahyo-1.0.0.jar decode せ春里か湖");
-        System.out.println("  java -jar wazahyo-1.0.0.jar encode-latlon 35.681236 139.767125");
-        System.out.println("  java -jar wazahyo-1.0.0.jar encode-meshcode 53394611323444");
-        System.out.println("  java -jar wazahyo-1.0.0.jar decode-meshcode せ春里か湖");
-        System.out.println("  java -jar wazahyo-1.0.0.jar decode-latlon せ春里か湖");
-        System.out.println("  java -jar wazahyo-1.0.0.jar mesh1-to-group 5339");
-        System.out.println("  java -jar wazahyo-1.0.0.jar group-to-mesh1 96");
+        System.out.println("  java -jar target/wazahyo-<version>.jar encode 42 1,2,3,4,1,0,2,3,1,2");
+        System.out.println("  java -jar target/wazahyo-<version>.jar decode せ春里か湖");
+        System.out.println("  java -jar target/wazahyo-<version>.jar encode-latlon 35.681236 139.767125");
+        System.out.println("  java -jar target/wazahyo-<version>.jar encode-meshcode 53394611323444");
+        System.out.println("  java -jar target/wazahyo-<version>.jar decode-meshcode せ春里か湖");
+        System.out.println("  java -jar target/wazahyo-<version>.jar decode-latlon せ春里か湖");
+        System.out.println("  java -jar target/wazahyo-<version>.jar mesh1-to-group 5339");
+        System.out.println("  java -jar target/wazahyo-<version>.jar group-to-mesh1 96");
     }
 }
