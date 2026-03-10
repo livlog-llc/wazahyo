@@ -15,7 +15,7 @@ public final class IdeRunSample {
      * @param args 未使用
      */
     public static void main(String[] args) {
-        // 東京駅付近（サンプル）
+        // 富士山付近（サンプル）
         double latitude = 35.3606255;
         double longitude = 138.7273634;
 
