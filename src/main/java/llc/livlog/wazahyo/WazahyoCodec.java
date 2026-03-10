@@ -4,10 +4,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -528,10 +531,34 @@ public final class WazahyoCodec {
                 throw new IllegalStateException("mesh1_groups.json does not contain a valid array");
             }
             String arrayBody = json.substring(arrayStart + 1, arrayEnd);
-            Matcher matcher = Pattern.compile("\\d+").matcher(arrayBody);
+
+            Pattern objectPattern = Pattern.compile("\\{[^{}]*}");
+            Pattern sequencePattern = Pattern.compile("\"sequence\"\\s*:\\s*(\\d+)");
+            Pattern mesh1CodePattern = Pattern.compile("\"mesh1Code\"\\s*:\\s*(\\d+)");
+
+            java.util.ArrayList<Mesh1Entry> entries = new java.util.ArrayList<>();
+            Set<Integer> seenSequences = new HashSet<>();
+            Set<Integer> seenMesh1Codes = new HashSet<>();
+            Matcher objectMatcher = objectPattern.matcher(arrayBody);
+            while (objectMatcher.find()) {
+                String objectJson = objectMatcher.group();
+                int sequence = extractJsonInt(objectJson, sequencePattern, "sequence");
+                int mesh1Code = extractJsonInt(objectJson, mesh1CodePattern, "mesh1Code");
+
+                if (!seenSequences.add(sequence)) {
+                    throw new IllegalStateException("Duplicate sequence in mesh1_groups.json: " + sequence);
+                }
+                if (!seenMesh1Codes.add(mesh1Code)) {
+                    throw new IllegalStateException("Duplicate mesh1Code in mesh1_groups.json: " + mesh1Code);
+                }
+                entries.add(new Mesh1Entry(sequence, mesh1Code));
+            }
+
+            entries.sort(Comparator.comparingInt(Mesh1Entry::sequence));
+
             java.util.ArrayList<Integer> values = new java.util.ArrayList<>();
-            while (matcher.find()) {
-                values.add(Integer.parseInt(matcher.group()));
+            for (Mesh1Entry entry : entries) {
+                values.add(entry.mesh1Code());
             }
             if (values.size() != 175) {
                 throw new IllegalStateException("mesh1 code count must be 175, but was " + values.size());
@@ -540,6 +567,17 @@ public final class WazahyoCodec {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to load " + MESH1_CODES_RESOURCE, e);
         }
+    }
+
+    private static int extractJsonInt(String jsonObject, Pattern pattern, String fieldName) {
+        Matcher matcher = pattern.matcher(jsonObject);
+        if (!matcher.find()) {
+            throw new IllegalStateException("mesh1_groups.json entry must include field: " + fieldName);
+        }
+        return Integer.parseInt(matcher.group(1));
+    }
+
+    private record Mesh1Entry(int sequence, int mesh1Code) {
     }
 
     /**
